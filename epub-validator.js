@@ -1,25 +1,26 @@
 // Ridibooks-Checker 0.0.1
 'use strict';
 
-var ps       = process,
-    path     = require('path'),
-    uuid     = require('node-uuid'),
-    tmpDir   = path.join(__dirname, 'epub-validator-temp'),
-    unzDir   = path.join(tmpDir, uuid.v1()),
-    pkg      = require(path.join(__dirname, 'package.json')),
-    fs       = require('fs'),
-    jxm      = require('jxm'),
-    cmd      = require('commander'),
-    rimraf   = require('rimraf'), /*폴더 삭제용*/
-    Zip      = require('adm-zip'),
-    humanize = require('ms'),
-    debug    = require('debug')('app'),
-    report   = require('./lib/Report'),
-    Epub     = require('./lib/EPubValidator'),
-    File     = require('./lib/FileValidator'),
-    config   = require('./lib/Config');
+var ps = process,
+  path = require('path'),
+  uuid = require('node-uuid'),
+  tmpDir = path.join(__dirname, 'epub-validator-temp'),
+  unzDir = path.join(tmpDir, uuid.v1()),
+  logDir = path.join('/mnt/logs',''),
+  pkg = require(path.join(__dirname, 'package.json')),
+  fs = require('fs'),
+  jxm = require('jxm'),
+  cmd = require('commander'),
+  rimraf = require('rimraf'), /*폴더 삭제용*/
+  Zip = require('adm-zip'),
+  humanize = require('ms'),
+  debug = require('debug')('app'),
+  report = require('./lib/Report'),
+  Epub = require('./lib/EPubValidator'),
+  File = require('./lib/FileValidator'),
+  config = require('./lib/Config');
 
-var exit = function(/*Number*/code, /*Object*/e) {
+var exit = function (/*Number*/code, /*Object*/e) {
   if (e !== undefined) {
     if (e.code === undefined) {
       throw e;
@@ -43,6 +44,7 @@ var exit = function(/*Number*/code, /*Object*/e) {
   report.add(code ? 'APP-102'/*검사 중지*/ : 'APP-103'/*검사 완료*/, null, [file || '', humanize(ms)]);
 
   report.print();
+  report.writeFile(logDir, uuid.v1() + '.log');
 
   debug('exit');
   ps.exit(code);
@@ -61,7 +63,7 @@ cmd.version(pkg.name + ' v' + pkg.version)
 
 debug('init');
 
-var file = cmd.args[0];
+var file = cmd.args[1];
 if (file === undefined) {
   report.add('APP-401'/*파라메터 부족*/);
   exit(1);
